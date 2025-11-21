@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Meituan-Dianping/cat-go/message"
-	"github.com/Meituan-Dianping/cat-go/test"
+	"github.com/alomerry/cat-go/message"
+	"github.com/alomerry/cat-go/test"
 )
 
 type brokenConn struct {

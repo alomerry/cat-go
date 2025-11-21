@@ -7,7 +7,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/Meituan-Dianping/cat-go/message"
+	"github.com/alomerry/cat-go/message"
 )
 
 type catMessageManager struct {

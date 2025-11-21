@@ -1,9 +1,10 @@
 package cat
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/Meituan-Dianping/cat-go/message"
+	"github.com/alomerry/cat-go/message"
 )
 
 func NewTransaction(mtype, name string) message.Transactor {
@@ -54,7 +55,7 @@ func LogError(err error, args ...string) {
 		return
 	}
 
-	var category = "CAT_ERROR"
+	var category = fmt.Sprintf("%T", err)
 
 	if len(args) > 0 {
 		category = args[0]
@@ -64,12 +65,16 @@ func LogError(err error, args ...string) {
 }
 
 func LogErrorWithCategory(err error, category string) {
+	LogErrorWithCategoryBySkipTrace(err, category, 3)
+}
+
+func LogErrorWithCategoryBySkipTrace(err error, category string, skip int) {
 	if !IsEnabled() {
 		return
 	}
 
 	var event = NewEvent("Error", category)
-	var buf = newStacktrace(2, err)
+	var buf = newStacktrace(skip, err)
 	event.SetStatus(message.CatError)
 	event.SetData(buf.String())
 	event.Complete()
