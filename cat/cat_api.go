@@ -1,9 +1,10 @@
 package cat
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/Meituan-Dianping/cat-go/message"
+	"github.com/alomerry/cat-go/message"
 )
 
 func NewTransaction(mtype, name string) message.Transactor {
@@ -54,7 +55,7 @@ func LogError(err error, args ...string) {
 		return
 	}
 
-	var category = "CAT_ERROR"
+	var category = fmt.Sprintf("%T", err)
 
 	if len(args) > 0 {
 		category = args[0]

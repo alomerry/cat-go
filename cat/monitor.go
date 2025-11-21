@@ -8,7 +8,7 @@ import (
 
 	"github.com/shirou/gopsutil/cpu"
 
-	"github.com/Meituan-Dianping/cat-go/message"
+	"github.com/alomerry/cat-go/message"
 )
 
 type catMonitor struct {

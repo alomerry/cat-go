@@ -28,6 +28,7 @@ const ( // Declared default values.
 	defaultIp    = "127.0.0.1"
 	defaultIpHex = "7f000001"
 
+	xmlFileFromEnv = "CAT_CLIENT_XML_FILE"
 	defaultXmlFile = "/data/appdatas/cat/client.xml"
 	defaultLogDir  = "/data/applogs/cat"
 	tmpLogDir      = "/tmp"
