@@ -75,3 +75,7 @@ func (t *nullTransaction) NewEvent(mtype, name string) Messager {
 func (t *nullTransaction) LogEvent(mtype, name string, args ...string) {
 	return
 }
+
+func (t *nullTransaction) NewTransaction(mtype, name string) Transactor {
+	return NullTransaction
+}

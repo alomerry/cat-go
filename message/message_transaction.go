@@ -15,6 +15,7 @@ type Transactor interface {
 	SetDuration(duration time.Duration)
 	SetDurationStart(time time.Time)
 	NewEvent(mtype, name string) Messager
+	NewTransaction(mtype, name string) Transactor
 	LogEvent(mtype, name string, args ...string)
 }
 
@@ -72,6 +73,12 @@ func (t *Transaction) LogEvent(mtype, name string, args ...string) {
 		e.SetData(args[1])
 	}
 	e.Complete()
+}
+
+func (t *Transaction) NewTransaction(mtype, name string) Transactor {
+	var tx = NewTransaction(mtype, name, nil)
+	t.AddChild(tx)
+	return tx
 }
 
 func (t *Transaction) AddChild(m Messager) {

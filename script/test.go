@@ -15,7 +15,7 @@ var wg = sync.WaitGroup{}
 
 func init() {
 	cat.DebugOn()
-	cat.Init("gocat.v2")
+	cat.Init("stage")
 }
 
 // send transaction

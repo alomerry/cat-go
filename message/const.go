@@ -9,3 +9,7 @@ const (
 	ReadableProtocol = "PT1"
 	BinaryProtocol   = "NT1"
 )
+
+const (
+	CtxKeyTransaction = "cat-transaction"
+)

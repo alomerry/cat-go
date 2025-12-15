@@ -1,11 +1,38 @@
 package cat
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/alomerry/cat-go/message"
 )
+
+func NewTransactionWithCtx(ctx context.Context, mtype, name string) (message.Transactor, context.Context) {
+	if !IsEnabled() {
+		return message.NullTransaction, ctx
+	}
+
+	var (
+		tx message.Transactor
+	)
+
+	tx = TransactionFromCtx(ctx)
+	if tx == nil {
+		tx = NewTransaction(mtype, name)
+	} else {
+		tx = tx.NewTransaction(mtype, name)
+	}
+
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+
+	ctx = context.WithValue(ctx, message.CtxKeyTransaction, tx)
+
+	return tx, ctx
+}
 
 func NewTransaction(mtype, name string) message.Transactor {
 	if !IsEnabled() {
@@ -68,15 +95,24 @@ func LogErrorWithCategory(err error, category string) {
 	LogErrorWithCategoryBySkipTrace(err, category, 3)
 }
 
-func LogErrorWithCategoryBySkipTrace(err error, category string, skip int) {
+func LogErrorWithCategoryBySkipTrace(err error, category string, skip int, msg ...string) {
 	if !IsEnabled() {
 		return
+	}
+
+	if len(category) == 0 {
+		category = err.Error()
+	}
+
+	var prefix string
+	if len(msg) > 0 {
+		prefix = strings.Join(msg, "\n") + "\n"
 	}
 
 	var event = NewEvent("Error", category)
 	var buf = newStacktrace(skip, err)
 	event.SetStatus(message.CatError)
-	event.SetData(buf.String())
+	event.SetData(prefix + buf.String())
 	event.Complete()
 }
 
@@ -103,4 +139,15 @@ func NewMetricHelper(name string) MetricHelper {
 		return &nullMetricHelper{}
 	}
 	return newMetricHelper(name)
+}
+
+func TransactionFromCtx(ctx context.Context) message.Transactor {
+	if ctx == nil {
+		return nil
+	}
+	var t = ctx.Value(message.CtxKeyTransaction)
+	if t == nil {
+		return nil
+	}
+	return t.(message.Transactor)
 }
