@@ -2,6 +2,7 @@ package cat
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/alomerry/cat-go/message"
@@ -68,15 +69,24 @@ func LogErrorWithCategory(err error, category string) {
 	LogErrorWithCategoryBySkipTrace(err, category, 3)
 }
 
-func LogErrorWithCategoryBySkipTrace(err error, category string, skip int) {
+func LogErrorWithCategoryBySkipTrace(err error, category string, skip int, msg ...string) {
 	if !IsEnabled() {
 		return
+	}
+
+	if len(category) == 0 {
+		category = err.Error()
+	}
+
+	var prefix string
+	if len(msg) > 0 {
+		prefix = strings.Join(msg, "\n") + "\n"
 	}
 
 	var event = NewEvent("Error", category)
 	var buf = newStacktrace(skip, err)
 	event.SetStatus(message.CatError)
-	event.SetData(buf.String())
+	event.SetData(prefix + buf.String())
 	event.Complete()
 }
 
