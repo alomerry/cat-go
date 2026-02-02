@@ -59,7 +59,7 @@ func (t *Transaction) SetDurationStart(time time.Time) {
 }
 
 func (t *Transaction) NewEvent(mtype, name string) Messager {
-	var e = NewEvent(mtype, name, nil)
+	var e = NewEvent(mtype, name, nil, WithTraceId(t.TraceId()))
 	t.AddChild(e)
 	return e
 }
@@ -76,7 +76,7 @@ func (t *Transaction) LogEvent(mtype, name string, args ...string) {
 }
 
 func (t *Transaction) NewTransaction(mtype, name string) Transactor {
-	var tx = NewTransaction(mtype, name, nil)
+	var tx = NewTransaction(mtype, name, nil, WithTraceId(t.TraceId()))
 	t.AddChild(tx)
 	return tx
 }
@@ -91,9 +91,9 @@ func (t *Transaction) GetChildren() []Messager {
 	return t.children
 }
 
-func NewTransaction(mtype, name string, flush Flush) *Transaction {
+func NewTransaction(mtype, name string, flush Flush, opts ...func(*Message)) *Transaction {
 	return &Transaction{
-		Message:       NewMessage(mtype, name, flush),
+		Message:       NewMessage(mtype, name, flush, opts...),
 		children:      make([]Messager, 0),
 		isCompleted:   false,
 		mu:            sync.Mutex{},

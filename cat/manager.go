@@ -93,3 +93,7 @@ func init() {
 		}
 	}
 }
+
+func nextId() string {
+	return manager.nextId()
+}

@@ -7,7 +7,7 @@ import (
 
 type Flush func(m Messager)
 
-//noinspection GoNameStartsWithPackageName
+// noinspection GoNameStartsWithPackageName
 type MessageGetter interface {
 	GetType() string
 	GetName() string
@@ -18,11 +18,15 @@ type MessageGetter interface {
 
 type Messager interface {
 	MessageGetter
+	Tracer
+
 	AddData(k string, v ...string)
 	SetData(v string)
 	SetStatus(status string)
 	SetTime(time time.Time)
 	Complete()
+
+	SetMessageId(id string)
 }
 
 type Message struct {
@@ -36,11 +40,22 @@ type Message struct {
 
 	data *bytes.Buffer
 
+	*tracer
+
 	flush Flush
 }
 
-func NewMessage(mtype, name string, flush Flush) Message {
-	return Message{
+func WithTraceId(id string) func(m *Message) {
+	return func(m *Message) {
+		if len(id) == 0 {
+			return
+		}
+		m.SetMessageId(id)
+	}
+}
+
+func NewMessage(mtype, name string, flush Flush, opts ...func(*Message)) Message {
+	m := Message{
 		Type:        mtype,
 		Name:        name,
 		Status:      CatSuccess,
@@ -49,6 +64,16 @@ func NewMessage(mtype, name string, flush Flush) Message {
 		data:        new(bytes.Buffer),
 		flush:       flush,
 	}
+
+	for _, opt := range opts {
+		opt(&m)
+	}
+
+	if m.tracer == nil {
+		m.tracer = newTracer()
+	}
+
+	return m
 }
 
 func (m *Message) Complete() {
@@ -79,6 +104,10 @@ func (m *Message) GetTime() time.Time {
 
 func (m *Message) SetTime(t time.Time) {
 	m.timestamp = t
+}
+
+func (m *Message) SetMessageId(id string) {
+	m.tracer = newTracer(id)
 }
 
 func (m *Message) AddData(k string, v ...string) {
