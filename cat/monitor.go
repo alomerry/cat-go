@@ -26,7 +26,7 @@ func sleep2NextMinute() *time.Timer {
 }
 
 func (m *catMonitor) afterStart() {
-	LogEvent(typeSystem, nameReboot)
+	LogEvent(nil, typeSystem, nameReboot)
 	m.collectAndSend()
 }
 

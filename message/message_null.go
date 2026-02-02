@@ -54,6 +54,14 @@ func (m *nullMessage) SetData(v string) {
 func (m *nullMessage) SetStatus(status string) {
 }
 
+func (m *nullMessage) SetMessageId(id string) {
+	return
+}
+
+func (m *nullMessage) TraceId() string {
+	return ""
+}
+
 func (t *nullTransaction) GetChildren() []Messager {
 	return []Messager{}
 }

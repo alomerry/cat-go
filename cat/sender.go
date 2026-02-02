@@ -9,16 +9,21 @@ import (
 	"github.com/alomerry/cat-go/message"
 )
 
-func createHeader() *message.Header {
-	return &message.Header{
+func createHeader(m message.Messager) *message.Header {
+	header := &message.Header{
 		Domain:   config.domain,
 		Hostname: config.hostname,
 		Ip:       config.ip,
 
-		MessageId:       manager.nextId(),
+		MessageId:       m.TraceId(),
 		ParentMessageId: "",
 		RootMessageId:   "",
 	}
+	if m.TraceId() == "" {
+		header.MessageId = manager.nextId()
+	}
+
+	return header
 }
 
 type catMessageSender struct {
@@ -63,7 +68,7 @@ func (s *catMessageSender) send(m message.Messager) {
 	var buf = s.buf
 	buf.Reset()
 
-	var header = createHeader()
+	var header = createHeader(m)
 	if err := s.encoder.EncodeHeader(buf, header); err != nil {
 		return
 	}

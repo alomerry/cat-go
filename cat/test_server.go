@@ -87,7 +87,8 @@ func (m *testServerManager) startHTTP(port int) *testHTTPServer {
 }
 
 func (m *testServerManager) shutdownHTTP(port int) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	if err := m.servers[port].Shutdown(ctx); err != nil {
 		log.Fatalf("Can't shutdown http server on port %d, %s", port, err)
 	}

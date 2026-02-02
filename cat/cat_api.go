@@ -55,19 +55,29 @@ func NewCompletedTransactionWithDuration(mtype, name string, duration time.Durat
 	trans.Complete()
 }
 
-func NewEvent(mtype, name string) message.Messager {
+func NewEvent(ctx context.Context, mtype, name string) message.Messager {
 	if !IsEnabled() {
 		return message.NullMessage
 	}
-	return message.NewEvent(mtype, name, manager.flush)
+
+	var (
+		tx message.Transactor
+	)
+
+	tx = TransactionFromCtx(ctx)
+	if tx == nil {
+		return message.NewEvent(mtype, name, manager.flush)
+	}
+
+	return tx.NewEvent(mtype, name)
 }
 
-func LogEvent(mtype, name string, args ...string) {
+func LogEvent(ctx context.Context, mtype, name string, args ...string) {
 	if !IsEnabled() {
 		return
 	}
 
-	var e = NewEvent(mtype, name)
+	var e = NewEvent(ctx, mtype, name)
 	if len(args) > 0 {
 		e.SetStatus(args[0])
 	}
@@ -77,7 +87,7 @@ func LogEvent(mtype, name string, args ...string) {
 	e.Complete()
 }
 
-func LogError(err error, args ...string) {
+func LogError(ctx context.Context, err error, args ...string) {
 	if !IsEnabled() {
 		return
 	}
@@ -88,14 +98,14 @@ func LogError(err error, args ...string) {
 		category = args[0]
 	}
 
-	LogErrorWithCategory(err, category)
+	LogErrorWithCategory(ctx, err, category)
 }
 
-func LogErrorWithCategory(err error, category string) {
-	LogErrorWithCategoryBySkipTrace(err, category, 3)
+func LogErrorWithCategory(ctx context.Context, err error, category string) {
+	LogErrorWithCategoryBySkipTrace(ctx, err, category, 3)
 }
 
-func LogErrorWithCategoryBySkipTrace(err error, category string, skip int, msg ...string) {
+func LogErrorWithCategoryBySkipTrace(ctx context.Context, err error, category string, skip int, msg ...string) {
 	if !IsEnabled() {
 		return
 	}
@@ -109,7 +119,7 @@ func LogErrorWithCategoryBySkipTrace(err error, category string, skip int, msg .
 		prefix = strings.Join(msg, "\n") + "\n"
 	}
 
-	var event = NewEvent("Error", category)
+	var event = NewEvent(ctx, "Error", category)
 	var buf = newStacktrace(skip, err)
 	event.SetStatus(message.CatError)
 	event.SetData(prefix + buf.String())
@@ -150,4 +160,41 @@ func TransactionFromCtx(ctx context.Context) message.Transactor {
 		return nil
 	}
 	return t.(message.Transactor)
+}
+
+func SetStatus(ctx context.Context, status string) {
+	tx := TransactionFromCtx(ctx)
+	if tx == nil {
+		return
+	}
+	tx.SetStatus(status)
+}
+
+func CompleteTransaction(ctx context.Context) {
+	tx := TransactionFromCtx(ctx)
+	if tx == nil {
+		return
+	}
+	tx.Complete()
+}
+
+func CompleteAndSetStatus(ctx context.Context, status string) {
+	SetStatus(ctx, status)
+	CompleteTransaction(ctx)
+}
+
+func AddDataKV(ctx context.Context, key, value string) {
+	tx := TransactionFromCtx(ctx)
+	if tx == nil {
+		return
+	}
+	tx.AddData(key, value+"\n")
+}
+
+func AddData(ctx context.Context, value string) {
+	tx := TransactionFromCtx(ctx)
+	if tx == nil {
+		return
+	}
+	tx.AddData(value + "\n")
 }

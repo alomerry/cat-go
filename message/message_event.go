@@ -18,8 +18,8 @@ func (e *Event) Complete() {
 	}
 }
 
-func NewEvent(mtype, name string, flush Flush) *Event {
+func NewEvent(mtype, name string, flush Flush, opts ...func(*Message)) *Event {
 	return &Event{
-		Message: NewMessage(mtype, name, flush),
+		Message: NewMessage(mtype, name, flush, opts...),
 	}
 }
