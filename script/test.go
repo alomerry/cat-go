@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"math/rand"
 	"sync"
@@ -53,23 +54,23 @@ func case2() {
 // send event
 func case3() {
 	// way 1
-	e := cat.NewEvent(TestType, "event-4")
+	e := cat.NewEvent(context.TODO(), TestType, "event-4")
 	e.Complete()
 	// way 2
 
 	if rand.Int31n(100) == 0 {
-		cat.LogEvent(TestType, "event-5", cat.FAIL)
+		cat.LogEvent(context.TODO(), TestType, "event-5", cat.FAIL)
 	} else {
-		cat.LogEvent(TestType, "event-5")
+		cat.LogEvent(context.TODO(), TestType, "event-5")
 	}
-	cat.LogEvent(TestType, "event-6", cat.SUCCESS, "foobar")
+	cat.LogEvent(context.TODO(), TestType, "event-6", cat.SUCCESS, "foobar")
 }
 
 // send error with backtrace
 func case4() {
 	if rand.Int31n(100) == 0 {
 		err := errors.New("error")
-		cat.LogError(err)
+		cat.LogError(context.TODO(), err)
 	}
 }
 
