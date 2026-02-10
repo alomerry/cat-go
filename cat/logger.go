@@ -40,7 +40,7 @@ func getWriterByTime(time time.Time) io.Writer {
 
 	file, err = openLoggerFile(defaultLogDir, time)
 	if err == nil {
-		log.Printf("Logs has been redirected to the file: %s", file.Name())
+		// log.Printf("Logs has been redirected to the file: %s", file.Name())
 		return file
 	}
 	log.Printf("Cannot open file in: %s", defaultLogDir)
@@ -50,7 +50,7 @@ func getWriterByTime(time time.Time) io.Writer {
 		log.Printf("Logs has been redirected to the file: %s", file.Name())
 		return file
 	}
-	log.Printf("Cannot open file in: %s, logger will be disabled.", tmpLogDir)
+	// log.Printf("Cannot open file in: %s, logger will be disabled.", tmpLogDir)
 
 	return ioutil.Discard
 }
